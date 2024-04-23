@@ -1,84 +1,122 @@
 package com.alfayedoficial.mydeviceadminreceiver
 
 import android.accessibilityservice.AccessibilityService
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.graphics.PixelFormat
-import android.net.Uri
+import android.content.IntentFilter
 import android.os.Build
-import android.provider.Settings
 import android.util.Log
-import android.view.View
-import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
 import java.util.LinkedList
 
+
+const val ACTION = "com.alfayedoficial.mydeviceadminreceiver.PASSWORD_RESULT"
+const val INFLATE_PASSWORD_ACTIVITY = "inflatedPasswordActivity"
+const val MY_SHARED_PREF = "secret_shared_prefs"
+const val COUNTER_ONE = "counterOne"
+const val PASSWORD ="password"
 class MyAccessibilityService : AccessibilityService() {
 
-    private var widgetView: View? = null
 
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-
-
-        if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
-            val rootNode = rootInActiveWindow
-            if (rootNode != null && isAppInfoScreen(rootNode)) {
-                // Check if the "App Info" screen for your app is opened
-                if (widgetView == null) {
-                    if (hasSystemAlertWindowPermission()) {
-                        showWidget2()
-                    } else {
-                        requestSystemAlertWindowPermission()
-                    }
+    private var counterOne = 0
+    private val passwordResultReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == ACTION) {
+                val resultValue = intent.getIntExtra("result" , ServiceResult.FAILURE.value)
+                counterOne = 0
+                saveCounterOne(counterOne)
+                if (resultValue == ServiceResult.SUCCESS.value) {
+                    // Handle the success case
+                    Log.d("TAG_Log", "Password entered successfully")
+                    saveInflatedPasswordActivity(true)
+                } else {
+                    // Handle the failure case
+                    Log.d("TAG_Log", "Password entry failed")
+                    saveInflatedPasswordActivity(false)
                 }
             }
         }
     }
 
-    //TAG_Log
-    private fun isAppInfoScreen(rootNode: AccessibilityNodeInfo?): Boolean {
-        if (rootNode == null) return false
 
-        // Check if the screen title contains "App Info"
-//        if (isAppInfoTitle(rootNode)) {
-//            return true
-//        }
-
-        // Check if there's a button with the label "Force stop" (or any other relevant button)
-//        if (hasForceStopButton(rootNode)) {
-//            return true
-//        }
-
-        if (hasAppName(rootNode)) {
-            return true
+    override fun onCreate() {
+        super.onCreate()
+        val filter = IntentFilter(ACTION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(passwordResultReceiver, filter, RECEIVER_NOT_EXPORTED)
+        }else{
+            registerReceiver(passwordResultReceiver, filter)
         }
 
-        // Check if there's any other characteristic specific to the "App Info" screen for your app
-
-        // If none of the above conditions are met, it's not the "App Info" screen for your app
-        return false
     }
 
-    private fun isAppInfoTitle(rootNode: AccessibilityNodeInfo): Boolean {
-        // Search for a TextView with the text "App Info" or any other relevant title
-        val titleNode = findNodeByText(rootNode, "App info")
-        return titleNode != null
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(passwordResultReceiver)
+    }
+    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+
+
+        if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
+            val rootNode = rootInActiveWindow
+
+            if ((accessibilityCase(rootNode) || appInfoCase(rootNode) || uninstallCase(rootNode)) && !getInflatedPasswordActivity() && getCounterOne() <1)  {
+                // Check if the "App Info" screen for your app is opened
+                inflatePasswordActivity()
+            }
+        }
+
+        if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
+            val rootNode = rootInActiveWindow
+            rootNode?.let { readAllText(it) }
+        }
+
     }
 
-    private fun hasForceStopButton(rootNode: AccessibilityNodeInfo): Boolean {
-        // Search for a Button with the text "Force stop" or any other relevant button
-        val forceStopButtonNode = findNodeByText(rootNode, "Force stop")
-        return forceStopButtonNode != null
+    private fun readAllText(node: AccessibilityNodeInfo?) {
+        if (node == null) return
+
+        // Check if the node has text and log/read it
+        if (node.getText() != null && node.getText().isNotEmpty()) {
+            Log.d("TextReader", "Text found: " + node.getText())
+        }
+
+        // Recursively call this method for all children of this node
+        for (i in 0 until node.childCount) {
+            readAllText(node.getChild(i))
+        }
+    }
+
+    //TAG_Log
+
+    private fun accessibilityCase(rootNode: AccessibilityNodeInfo?): Boolean {
+        if (rootNode == null) return false
+        val nodeAccessibility = findNodeByText(rootNode, "Accessibility")
+        val nodeAccessibility_ar = findNodeByText(rootNode, "سهولة الاستخدام")
+        val nodeOn = findNodeByText(rootNode, "On")
+        val nodeOn_ar = findNodeByText(rootNode, "مفعّل")
+
+        return hasAppName(rootNode) &&(nodeAccessibility != null || nodeAccessibility_ar != null) && (nodeOn != null || nodeOn_ar != null)
+    }
+
+
+    private fun appInfoCase(rootNode: AccessibilityNodeInfo?):Boolean{
+        if (rootNode == null) return false
+        val nodeAppInfo = findNodeByText(rootNode, "App Info")
+        val nodeAppInfo_ar = findNodeByText(rootNode, "معلومات التطبيق")
+        val nodeAppInfo_ar2 = findNodeByText(rootNode, "معلومات عن التطبيقات")
+
+        return hasAppName(rootNode) &&(nodeAppInfo != null || nodeAppInfo_ar != null || nodeAppInfo_ar2 != null)
+    }
+
+    private fun uninstallCase(rootNode: AccessibilityNodeInfo?): Boolean{
+        if (rootNode == null) return false
+        val nodeUninstall = findNodeByText(rootNode, "Do you want to uninstall this app?")
+        val nodeUninstall_ar = findNodeByText(rootNode, "هل تريد إزالة هذا التطبيق")
+
+        return hasAppName(rootNode) &&(nodeUninstall != null || nodeUninstall_ar != null)
     }
 
     private fun hasAppName(rootNode: AccessibilityNodeInfo): Boolean {
@@ -86,6 +124,9 @@ class MyAccessibilityService : AccessibilityService() {
         val forceStopButtonNode = findNodeByText(rootNode, "MyDeviceAdminReceiver")
         return forceStopButtonNode != null
     }
+
+
+
 
     private fun findNodeByText(rootNode: AccessibilityNodeInfo, searchText: String): AccessibilityNodeInfo? {
         val nodeQueue = LinkedList<AccessibilityNodeInfo>()
@@ -124,84 +165,17 @@ class MyAccessibilityService : AccessibilityService() {
 
     override fun onInterrupt() {
         // Handle interruption of the service
-
     }
 
 
-    private fun showWidget2() {
-        if (!isWidgetShown()) {
-            val intent = Intent(applicationContext, WidgetActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            applicationContext.startActivity(intent)
-        }
+    private fun inflatePasswordActivity() {
+        val passwordIntent = Intent(this, PasswordActivity::class.java)
+        passwordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(passwordIntent)
+        logAppInfoScreenEvent()
+        counterOne++
+        saveCounterOne(counterOne)
     }
 
 
-
-    private fun showWidget() {
-        if (!isWidgetShown()) {
-            val context = applicationContext
-            val view = ComposeView(context).apply {
-                setContent {
-                    WidgetContent()
-                }
-            }
-
-            val params = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-            )
-
-            val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            windowManager.addView(view, params)
-            widgetView = view
-
-            logAppInfoScreenEvent()
-        }
-    }
-
-    fun hideWidget() {
-        if (isWidgetShown()) {
-            val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            windowManager.removeView(widgetView)
-            widgetView = null
-        }
-    }
-
-    private fun isWidgetShown(): Boolean {
-        return widgetView != null
-    }
-
-    private fun hasSystemAlertWindowPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Settings.canDrawOverlays(this)
-        } else {
-            true // No need for permission before Android 6.0
-        }
-    }
-
-    private fun requestSystemAlertWindowPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
-            intent.data = Uri.parse("package:$packageName")
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK // Add this line
-            startActivity(intent)
-        }
-    }
-}
-
-@Composable
-fun WidgetContent() {
-    // Define the UI for your widget using Jetpack Compose
-    Column(modifier = Modifier.fillMaxSize() ,
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,) {
-        Text(text = "This is a full-screen widget", modifier = Modifier.fillMaxWidth())
-
-        Button(onClick = {/* hideWidget()*/ }) {
-            Text(text = "Close Widget")
-        }
-    }
 }

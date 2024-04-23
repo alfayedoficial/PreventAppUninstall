@@ -4,9 +4,9 @@
     android:accessibilityFeedbackType="feedbackSpoken"
     android:accessibilityFlags="flagDefault"
     android:description="@string/accessibility_service_description"
-    android:packageNames="com.android.settings"
+    android:packageNames="@null"
     android:notificationTimeout="1000"
     android:canRequestEnhancedWebAccessibility="true"
     android:canRetrieveWindowContent="true"
     android:canRequestTouchExplorationMode="true"
-    android:settingsActivity="com.example.package.SettingsActivity" />
+    android:settingsActivity="@null" />
