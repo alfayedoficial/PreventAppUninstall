@@ -1,4 +1,4 @@
-package com.alfayedoficial.mydeviceadminreceiver
+package com.alfayedoficial.mydeviceadminreceiver.domain.model
 
 enum class ServiceResult(val value: Int) {
     SUCCESS(1),

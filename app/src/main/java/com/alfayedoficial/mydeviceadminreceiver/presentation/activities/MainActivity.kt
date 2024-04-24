@@ -1,4 +1,4 @@
-package com.alfayedoficial.mydeviceadminreceiver
+package com.alfayedoficial.mydeviceadminreceiver.presentation.activities
 
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.AlarmManager
@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.alfayedoficial.mydeviceadminreceiver.presentation.screens.SubmitLockPasswordScreen
+import com.alfayedoficial.mydeviceadminreceiver.data.preference.UpdatePreferenceReceiver
+import com.alfayedoficial.mydeviceadminreceiver.service.MyAccessibilityService
 import com.alfayedoficial.mydeviceadminreceiver.ui.theme.MyDeviceAdminReceiverTheme
 
 class MainActivity : ComponentActivity() {
@@ -24,12 +27,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         setContent {
             MyDeviceAdminReceiverTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    SubmitLockPasswordScreen{
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    SubmitLockPasswordScreen {
                         if (!isIgnoringBatteryOptimizations()) {
                             requestIgnoreBatteryOptimizations()
                         }
@@ -42,10 +47,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-
-
     }
+
     private fun isIgnoringBatteryOptimizations(): Boolean {
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
         return powerManager.isIgnoringBatteryOptimizations(packageName)
@@ -60,7 +63,8 @@ class MainActivity : ComponentActivity() {
 
     private fun isAccessibilityServiceEnabled(): Boolean {
         val accessibilityManager = getSystemService(ACCESSIBILITY_SERVICE) as AccessibilityManager
-        val enabledServices = accessibilityManager.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_SPOKEN)
+        val enabledServices =
+            accessibilityManager.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_SPOKEN)
         val serviceName = ComponentName(this, MyAccessibilityService::class.java)
         for (service in enabledServices) {
             if (serviceName == ComponentName.unflattenFromString(service.id)) {
@@ -85,13 +89,23 @@ class MainActivity : ComponentActivity() {
     private fun setupAlarm(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, UpdatePreferenceReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
         // Set the alarm to wake up the device every 10 minutes
-        val interval = 60000L // 10 minutes in milliseconds
+        // 10 minutes in milliseconds
+        val interval = 60000L
 
         // Use setInexactRepeating for battery efficiency or setExactAndAllowWhileIdle for precise scheduling
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()+interval, interval, pendingIntent)
+        alarmManager.setInexactRepeating(
+            AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + interval,
+            interval,
+            pendingIntent
+        )
     }
-
 }

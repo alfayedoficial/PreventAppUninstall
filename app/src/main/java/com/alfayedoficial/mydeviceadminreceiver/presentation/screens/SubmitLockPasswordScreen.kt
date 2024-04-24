@@ -1,4 +1,4 @@
-package com.alfayedoficial.mydeviceadminreceiver
+package com.alfayedoficial.mydeviceadminreceiver.presentation.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,16 +22,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.alfayedoficial.mydeviceadminreceiver.R
+import com.alfayedoficial.mydeviceadminreceiver.data.preference.savePassword
 
 @Composable
 fun SubmitLockPasswordScreen(confirm: () -> Unit) {
-    var password by remember { mutableStateOf("") }
-    var confrimPassword by remember { mutableStateOf("") }
 
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
     val context = LocalContext.current
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.White
@@ -44,7 +48,7 @@ fun SubmitLockPasswordScreen(confirm: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Confirm Password",
+                text = stringResource(R.string.confirm_password),
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
@@ -52,7 +56,21 @@ fun SubmitLockPasswordScreen(confirm: () -> Unit) {
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Enter Password") },
+                label = { Text(stringResource(R.string.enter_password)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = { Text(stringResource(R.string.confirm_password)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -63,24 +81,14 @@ fun SubmitLockPasswordScreen(confirm: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = confrimPassword,
-                onValueChange = { confrimPassword = it },
-                label = { Text("Confirm Password") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
             Button(
                 onClick = {
                     context.savePassword(password)
                     confirm()
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = (password == confrimPassword)
+                enabled = (password.isNotEmpty() || confirmPassword.isNotEmpty())
+                        && (password == confirmPassword)
             ) {
                 Text(text = "Confirm")
             }

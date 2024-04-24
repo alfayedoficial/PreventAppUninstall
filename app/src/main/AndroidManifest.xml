@@ -2,11 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 
     <application
@@ -20,13 +22,13 @@
         android:theme="@style/Theme.MyDeviceAdminReceiver"
         tools:targetApi="31">
         <activity
-            android:name=".PasswordActivity"
+            android:name=".presentation.activities.PasswordActivity"
             android:exported="false"
             android:label="@string/title_activity_password"
             android:theme="@style/Theme.MyDeviceAdminReceiver" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".presentation.activities.MainActivity"
             android:exported="true"
             android:label="@string/title_activity_main"
             android:theme="@style/Theme.MyDeviceAdminReceiver">
@@ -37,9 +39,8 @@
             </intent-filter>
         </activity>
 
-
         <service
-            android:name=".MyAccessibilityService"
+            android:name=".service.MyAccessibilityService"
             android:exported="false"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
@@ -51,8 +52,7 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
-        <receiver
-            android:name=".UpdatePreferenceReceiver" />
+        <receiver android:name=".data.preference.UpdatePreferenceReceiver" />
 
     </application>
 

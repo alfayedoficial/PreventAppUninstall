@@ -8,4 +8,8 @@
     <string name="accessibility_service_description">Description of your accessibility service goes here</string>
     <string name="title_activity_password">PasswordActivity</string>
 
+    <string name="confirm_password">Confirm Password</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="confirm">Confirm</string>
+
 </resources>

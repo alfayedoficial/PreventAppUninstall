@@ -1,4 +1,4 @@
-package com.alfayedoficial.mydeviceadminreceiver
+package com.alfayedoficial.mydeviceadminreceiver.presentation.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,14 +22,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.alfayedoficial.mydeviceadminreceiver.R
+import com.alfayedoficial.mydeviceadminreceiver.data.preference.getDecryptPassword
+import com.alfayedoficial.mydeviceadminreceiver.domain.model.ServiceResult
 
 @Composable
 fun LockPasswordScreen(onConfirmClicked: (result: ServiceResult) -> Unit) {
+
     var password by remember { mutableStateOf("") }
     val context = LocalContext.current
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color.White
@@ -42,7 +48,7 @@ fun LockPasswordScreen(onConfirmClicked: (result: ServiceResult) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Confirm Password",
+                text = stringResource(id = R.string.confirm_password),
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
@@ -50,7 +56,7 @@ fun LockPasswordScreen(onConfirmClicked: (result: ServiceResult) -> Unit) {
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Enter Password") },
+                label = { Text(text = stringResource(id = R.string.enter_password)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -63,14 +69,14 @@ fun LockPasswordScreen(onConfirmClicked: (result: ServiceResult) -> Unit) {
 
             Button(
                 onClick = {
-                    onConfirmClicked(
-                        ServiceResult.SUCCESS.takeIf { password == context.getDecryptPassword()} ?: ServiceResult.FAILURE
-                    )
+                    onConfirmClicked(ServiceResult.SUCCESS.takeIf {
+                        password == context.getDecryptPassword()
+                    } ?: ServiceResult.FAILURE)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = password.isNotEmpty()
             ) {
-                Text(text = "Confirm")
+                Text(text = stringResource(R.string.confirm))
             }
         }
     }
