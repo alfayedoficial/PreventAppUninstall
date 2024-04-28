@@ -75,7 +75,7 @@ class MyAccessibilityService : AccessibilityService() {
             if ((AccessibilityUseCase().invoke(rootNode)
                         || AppInfoUseCase().invoke(rootNode)
                         || UninstallUseCase().invoke(rootNode))
-                && !getInflatedPasswordActivity() && getCounterOne() < 1
+                && !getInflatedPasswordActivity() || getCounterOne() < 1
             ) {
                 inflatePasswordActivity()
             }
