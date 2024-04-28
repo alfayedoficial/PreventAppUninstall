@@ -22,10 +22,17 @@ import com.alfayedoficial.mydeviceadminreceiver.service.utils.ServiceUtils.readA
 const val ACTION_PASSWORD_RESULT = "com.alfayedoficial.mydeviceadminreceiver.PASSWORD_RESULT"
 const val PREF_SECRET_SHARED = "secret_shared_prefs"
 
+/**
+ * MyAccessibilityService is an AccessibilityService responsible for handling accessibility events
+ * and performing specific actions based on those events.
+ */
 class MyAccessibilityService : AccessibilityService() {
 
     private var counterOne = 0
 
+    /**
+     * BroadcastReceiver for receiving password results.
+     */
     private val passwordResultReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
 
@@ -64,13 +71,12 @@ class MyAccessibilityService : AccessibilityService() {
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
             val rootNode = rootInActiveWindow
 
-            if (
-                (AccessibilityUseCase().invoke(rootNode)
+            // Check if the (Accessibility, App Info, Uninstall) screen for your app is opened
+            if ((AccessibilityUseCase().invoke(rootNode)
                         || AppInfoUseCase().invoke(rootNode)
                         || UninstallUseCase().invoke(rootNode))
                 && !getInflatedPasswordActivity() && getCounterOne() < 1
             ) {
-                // Check if the "App Info" screen for your app is opened
                 inflatePasswordActivity()
             }
         }
@@ -86,6 +92,9 @@ class MyAccessibilityService : AccessibilityService() {
         // Handle interruption of the service
     }
 
+    /**
+     * Inflates the PasswordActivity and increments the counter.
+     */
     private fun inflatePasswordActivity() {
         val passwordIntent = Intent(this, PasswordActivity::class.java)
         passwordIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
