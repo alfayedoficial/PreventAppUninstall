@@ -1,15 +1,4 @@
 <resources>
     <string name="app_name">MyDeviceAdminReceiver</string>
-    <string name="device_admin_description">This app needs device administrator privileges to prevent uninstallation without a password.</string>
-    <string name="device_admin">Device Administrator</string>
-    <string name="title_activity_device_admin">DeviceAdminActivity</string>
-    <string name="title_activity_new_jetpack">NewActivityJetpack</string>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="accessibility_service_description">Description of your accessibility service goes here</string>
-    <string name="title_activity_password">PasswordActivity</string>
-
-    <string name="confirm_password">Confirm Password</string>
-    <string name="enter_password">Enter Password</string>
-    <string name="confirm">Confirm</string>
-
+    <string name="accessibility_service_description">Monitors and notifies when the Accessibility, App Info, or Uninstall screens specific to your application are accessed.</string>
 </resources>

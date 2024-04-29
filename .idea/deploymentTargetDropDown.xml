@@ -5,6 +5,15 @@
       <entry key="app">
         <State />
       </entry>
+      <entry key="preventUninstallApp">
+        <State />
+      </entry>
+      <entry key="preventUninstallApp_old">
+        <State />
+      </entry>
+      <entry key="preventuninstalladmin">
+        <State />
+      </entry>
     </value>
   </component>
 </project>

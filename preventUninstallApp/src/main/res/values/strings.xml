@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- activitys -->
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_password">PasswordActivity</string>
+
+    <string name="confirm_password">Confirm Password</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="confirm">Confirm</string>
+    <string name="password_entered_successfully">Password entered successfully</string>
+    <string name="password_entered_failed">Password entered failed</string>
+    <string name="accessibility_service_description">Monitors and notifies when the Accessibility, App Info, or Uninstall screens specific to your application are accessed.</string>
+</resources>

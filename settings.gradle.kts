@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "MyDeviceAdminReceiver"
 include(":app")
+include(":preventUninstallApp")
